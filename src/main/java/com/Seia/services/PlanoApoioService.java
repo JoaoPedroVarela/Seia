@@ -1,5 +1,6 @@
 package com.Seia.services;
 
+import com.Seia.dtos.DadosApoioDTO;
 import com.Seia.dtos.PlanoApoioDTO;
 import com.Seia.models.DadosApoio;
 import com.Seia.models.PlanosApoio;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PlanoApoioService {
@@ -51,7 +51,8 @@ public class PlanoApoioService {
 
         return new PlanoApoioDTO(
                 planoSalvo.getId(),
-                planoSalvo.getConteudoGeradoIa()
+                planoSalvo.getConteudoGeradoIa(),
+                DadosApoioDTO.toDTO(planoSalvo.getDadosApoio())
         );
     }
 
@@ -65,16 +66,24 @@ public class PlanoApoioService {
 
         return new PlanoApoioDTO(
                 planoAtualizado.getId(),
-                planoAtualizado.getConteudoGeradoIa()
+                planoAtualizado.getConteudoGeradoIa(),
+                DadosApoioDTO.toDTO(planoAtualizado.getDadosApoio())
         );
     }
 
-    public List<PlanoApoioDTO> listarPlanosPorUsuario(Long idUsuario) {
+    public List<PlanoApoioDTO> listarPlanosPorUsuario(Integer idUsuario) {
         List<PlanoApoioDTO> lista = new ArrayList<>();
         for(PlanosApoio planoApoio : planoApoioRepository.findByUsuarioId(idUsuario)) {
-            lista.add(new PlanoApoioDTO(planoApoio.getId(), planoApoio.getConteudoGeradoIa()));
+            lista.add(new PlanoApoioDTO(planoApoio.getId(), planoApoio.getConteudoGeradoIa(), DadosApoioDTO.toDTO(planoApoio.getDadosApoio())));
         }
 
         return lista;
+    }
+
+    public PlanoApoioDTO buscarPorId(Long idPlano) {
+        PlanosApoio planoApoio = planoApoioRepository.findById(idPlano)
+                .orElseThrow(() -> new RuntimeException("Plano não encontrado!"));
+
+        return new PlanoApoioDTO(planoApoio.getId(), planoApoio.getConteudoGeradoIa(), DadosApoioDTO.toDTO(planoApoio.getDadosApoio()));
     }
 }

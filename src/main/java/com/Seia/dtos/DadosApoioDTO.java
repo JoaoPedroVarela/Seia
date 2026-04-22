@@ -17,4 +17,8 @@ public record DadosApoioDTO(String nome, String materia, String serie, String co
 
         return dadosApoio;
     }
+
+    public static DadosApoioDTO toDTO(DadosApoio dadosApoio) {
+        return new DadosApoioDTO(dadosApoio.getNome(), dadosApoio.getMateria(), dadosApoio.getSerie(), dadosApoio.getConteudos(), dadosApoio.getBarreiras(), dadosApoio.getSolucaoNecessaria());
+    }
 }
