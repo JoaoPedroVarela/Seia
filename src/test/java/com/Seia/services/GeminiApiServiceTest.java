@@ -3,11 +3,15 @@ package com.Seia.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.mock.web.MockMultipartFile;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -118,11 +122,18 @@ class GeminiApiServiceTest {
         ChatResponse respostaValida = criarResposta(JSON_VALIDO);
         when(chatModel.call(any(Prompt.class)))
                 .thenReturn(respostaInvalida, respostaValida);
+        MockMultipartFile anexo = new MockMultipartFile(
+                "arquivo", "material.pdf", "application/pdf", "conteúdo".getBytes(StandardCharsets.UTF_8));
 
-        String html = gerarPlano();
+        String html = gerarPlano(anexo);
 
         assertThat(html).contains("Mapa de Conteúdos por Prioridade");
-        verify(chatModel, times(2)).call(any(Prompt.class));
+        ArgumentCaptor<Prompt> prompts = ArgumentCaptor.forClass(Prompt.class);
+        verify(chatModel, times(2)).call(prompts.capture());
+        assertThat(prompts.getAllValues().get(0).getUserMessage().getMedia()).hasSize(1);
+        assertThat(prompts.getAllValues().get(1).getUserMessage().getMedia()).isEmpty();
+        assertThat(prompts.getAllValues().get(1).getUserMessage().getText())
+                .contains("resposta anterior", "{json incompleto");
     }
 
     @Test
@@ -172,9 +183,13 @@ class GeminiApiServiceTest {
     }
 
     private String gerarPlano() {
+        return gerarPlano(null);
+    }
+
+    private String gerarPlano(MockMultipartFile arquivo) {
         return service.gerarPlanoDeApoioHtml(
                 "Turma A", "Cálculo I", "1º semestre",
-                "Aplicar derivadas", "Dificuldade de interpretação", "Monitoria", null);
+                "Aplicar derivadas", "Dificuldade de interpretação", "Monitoria", arquivo);
     }
 
     private ChatResponse criarResposta(String texto) {

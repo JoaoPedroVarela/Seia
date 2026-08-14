@@ -24,6 +24,24 @@ class HigienizadorHtmlPlanoTest {
     }
 
     @Test
+    void devePreservarCoresQuandoOTextoTambemPossuiFormatacao() {
+        String html = """
+                <p>
+                    <strong style="color: #e60000">Negrito</strong>
+                    <em style="background-color: #ffff00">Itálico</em>
+                    <u style="color: rgb(0, 102, 204)">Sublinhado</u>
+                </p>
+                """;
+
+        String resultado = higienizador.higienizar(html);
+
+        assertThat(resultado)
+                .contains("<strong style=\"color: #e60000\">Negrito</strong>")
+                .contains("<em style=\"background-color: #ffff00\">Itálico</em>")
+                .contains("<u style=\"color: rgb(0, 102, 204)\">Sublinhado</u>");
+    }
+
+    @Test
     void deveRemoverScriptsEventosLinksEEstilosPerigosos() {
         String html = """
                 <script>alert('x')</script>

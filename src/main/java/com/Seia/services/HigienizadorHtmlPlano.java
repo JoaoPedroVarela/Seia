@@ -26,7 +26,10 @@ public class HigienizadorHtmlPlano {
     );
     private static final Safelist ELEMENTOS_PERMITIDOS = Safelist.none()
             .addTags("h2", "h3", "p", "ul", "ol", "li", "strong", "em", "u", "span", "br")
-            .addAttributes("span", "style");
+            .addAttributes("span", "style")
+            .addAttributes("strong", "style")
+            .addAttributes("em", "style")
+            .addAttributes("u", "style");
 
     public String higienizar(String html) {
         Document documento = Jsoup.parseBodyFragment(html == null ? "" : html);
