@@ -1,12 +1,11 @@
 package com.Seia.controllers;
 
 import com.Seia.dtos.PlanoApoioDTO;
-import com.Seia.models.Usuario;
-import com.Seia.repositories.UsuarioRepository;
 import com.Seia.services.PlanoApoioService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,16 +14,15 @@ import java.util.List;
 public class PlanoApoioController {
 
     private final PlanoApoioService planoApoioService;
-    private final UsuarioRepository usuarioRepository;
 
-    public PlanoApoioController(PlanoApoioService planoApoioService, UsuarioRepository usuarioRepository) {
+    public PlanoApoioController(PlanoApoioService planoApoioService) {
         this.planoApoioService = planoApoioService;
-        this.usuarioRepository = usuarioRepository;
     }
 
-    @PostMapping("/gerar/{dadosApoioId}")
-    public ResponseEntity<PlanoApoioDTO> gerarPlano(@PathVariable Long dadosApoioId) {
-        PlanoApoioDTO planoGerado = planoApoioService.gerarESalvarPlano(dadosApoioId);
+    @PostMapping(value = "/gerar/{dadosApoioId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PlanoApoioDTO> gerarPlano(@PathVariable Long dadosApoioId,
+                                                    @RequestPart(value = "arquivo", required = false) MultipartFile arquivo) {
+        PlanoApoioDTO planoGerado = planoApoioService.gerarESalvarPlano(dadosApoioId, arquivo);
         return ResponseEntity.ok(planoGerado);
     }
 
@@ -36,21 +34,18 @@ public class PlanoApoioController {
 
     @GetMapping("/meus-planos")
     public ResponseEntity<List<PlanoApoioDTO>> listaPlanosDeApoio() {
-
-        String emailDoToken = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        Usuario usuario = usuarioRepository.findByEmail(emailDoToken)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-
-        List<PlanoApoioDTO> lista = planoApoioService.listarPlanosPorUsuario(usuario.getId());
-
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(planoApoioService.listarPlanosDoUsuarioAtual());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlanoApoioDTO> buscarPlanoPorId(@PathVariable Long id) {
         PlanoApoioDTO plano = planoApoioService.buscarPorId(id);
         return ResponseEntity.ok(plano);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluirPlano(@PathVariable Long id) {
+        planoApoioService.excluirPlano(id);
+        return ResponseEntity.noContent().build();
     }
 }

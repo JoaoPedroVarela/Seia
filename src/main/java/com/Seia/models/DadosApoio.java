@@ -23,7 +23,7 @@ public class DadosApoio {
     @Column(nullable = false, length = 100)
     private String serie;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String conteudos;
 
     @Column(nullable = false, columnDefinition = "TEXT")

@@ -2,6 +2,7 @@ package com.Seia.controllers;
 
 import com.Seia.dtos.DadosApoioDTO;
 import com.Seia.services.DadosApoioService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class DadosApoioController {
     }
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<Long> cadastrarDadosApoio(@RequestBody DadosApoioDTO dadosApoioDTO) {
+    public ResponseEntity<Long> cadastrarDadosApoio(@Valid @RequestBody DadosApoioDTO dadosApoioDTO) {
         Long idDadoCadastrado = dadosApoioService.save(dadosApoioDTO);
         return ResponseEntity.ok(idDadoCadastrado);
     }
